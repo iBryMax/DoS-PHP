@@ -38,14 +38,14 @@ class DoS {
      * @return bool
      */
     protected function open_udp_connection(string $hostname, int $port, string $out) : bool {
-        $socket = fsockopen("udp://".$hostname, $port, $errno, $errstr, 15);
+        $socket = @fsockopen("udp://".$hostname, $port, $errno, $errstr, 15);
         if($errno and $socket){
 			throw new \Exception($errstr, $errno);
 		}elseif(!$socket) {
 			throw new \Exception($errstr, $errno);
 		}
         print("SOCKET opened\nhostname: $hostname\nport: $port"."<br>");
-        if(!fwrite($socket, $out)){
+        if(!@fwrite($socket, $out)){
             throw new \Exception("An error occurred while sending the data");
         }
         fclose($socket);
